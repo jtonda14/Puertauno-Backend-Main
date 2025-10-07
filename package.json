@@ -1,0 +1,17 @@
+{
+    "name": "kiboko-Backend",
+    "version": "1.0.0",
+    "description": "Backend with serverless API endpoints for Vercel",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vercel dev --listen 3051",
+        "start": "vercel dev"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.5",
+        "form-data": "^4.0.4",
+        "vercel": "^44.4.3",
+        "xml2js": "^0.4.23"
+    },
+    "license": "MIT"
+}
