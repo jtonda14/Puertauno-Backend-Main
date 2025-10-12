@@ -115,6 +115,31 @@ export default async function handler(req, res) {
       if (!updated || updated.length === 0) {
         return res.status(404).json({ error: 'Not found' });
       }
+
+      // Actualizar el link asociado solo para exp_date y email
+      const linkUpdateData = {};
+      if (filteredData.check_out !== undefined) {
+        linkUpdateData.exp_date = filteredData.check_out;
+      }
+      if (filteredData.email !== undefined) {
+        linkUpdateData.email = filteredData.email;
+        // Si se cambia el email, resetear emails_sent a 0
+        linkUpdateData.emails_sent = 0;
+      }
+
+      // Solo actualizar el link si hay campos que cambiar
+      if (Object.keys(linkUpdateData).length > 0) {
+        const { error: linkError } = await supabase
+          .from('links')
+          .update(linkUpdateData)
+          .eq('accommodation_request_id', id);
+        
+        if (linkError) {
+          console.error('Error updating link:', linkError);
+          // No fallar la operación principal si falla la actualización del link
+        }
+      }
+
       return res.status(200).json({ success: true, updated: updated[0] });
     } catch (err) {
       console.error(err);
@@ -171,7 +196,31 @@ export default async function handler(req, res) {
         .insert([filteredData])
         .select();
       if (error) throw error;
-      return res.status(201).json({ success: true, accommodation_request: created[0] });
+      
+      // Crear un link asociado al accommodation_request
+      const linkData = {
+        accommodation_code: filteredData.establishment_code,
+        accommodation_request_id: created[0].id,
+        url: process.env.GUESTS_WEB_URL,
+        exp_date: filteredData.check_out,
+        email: data.email || null
+      };
+
+      const { data: linkCreated, error: linkError } = await supabase
+        .from('links')
+        .insert([linkData])
+        .select();
+      
+      if (linkError) {
+        console.error('Error creating link:', linkError);
+        // No fallar la operación principal si falla la creación del link
+      }
+
+      return res.status(201).json({ 
+        success: true, 
+        accommodation_request: created[0],
+        link: linkCreated ? linkCreated[0] : null
+      });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: err.message });

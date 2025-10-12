@@ -1,17 +1,25 @@
 {
     "name": "kiboko-Backend",
     "version": "1.0.0",
-    "description": "Backend with serverless API endpoints for Vercel",
-    "main": "index.js",
+    "description": "Backend with API endpoints (local dev via Express, deployable to Vercel)",
+    "main": "server.js",
     "scripts": {
-        "dev": "vercel dev --listen 3051",
-        "start": "vercel dev"
+        "dev": "nodemon server.js --watch api --ext js,json",
+        "start": "node server.js"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.39.5",
         "form-data": "^4.0.4",
+        "node-fetch": "^2.7.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
         "vercel": "^44.4.3",
         "xml2js": "^0.4.23"
     },
+    "devDependencies": {
+        "nodemon": "^3.1.0"
+    },
+    "type": "module",
     "license": "MIT"
 }

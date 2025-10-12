@@ -20,6 +20,25 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      if (req.query.accommodation_request_id) {
+        let query = supabase
+          .from('links')
+          .select('*');
+
+        const accommodationRequestIDs = req.query.accommodation_request_id.split(',');
+        if (accommodationRequestIDs.length === 1) {
+          query = query.eq('accommodation_request_id', accommodationRequestIDs[0]);
+        } else {
+          query = query.in('accommodation_request_id', accommodationRequestIDs);
+        }
+
+        const { data, error } = await query
+          .limit(accommodationRequestIDs.length);
+
+        if (error) throw error;
+        return res.status(200).json({ links: data });
+      }
+
       const { data, error } = await supabase
         .rpc('get_links_with_requests');
       if (error) throw error;
@@ -33,7 +52,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const linkData = req.body;
-      
+
       // Validar campos obligatorios
       if (!linkData.url || linkData.url.trim() === '') {
         return res.status(400).json({ error: 'URL is required' });
@@ -60,10 +79,10 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
-      return res.status(201).json({ 
-        success: true, 
+      return res.status(201).json({
+        success: true,
         link: createdLink,
-        message: 'Link created successfully' 
+        message: 'Link created successfully'
       });
     } catch (err) {
       console.error('Error creating link:', err);
@@ -75,7 +94,7 @@ export default async function handler(req, res) {
     try {
       const linkData = req.body;
       const id = req.query.id;
-      
+
       if (!id) {
         return res.status(400).json({ error: 'Missing id parameter' });
       }
@@ -107,10 +126,10 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
-      return res.status(200).json({ 
-        success: true, 
+      return res.status(200).json({
+        success: true,
         updated: updatedLink,
-        message: 'Link updated successfully' 
+        message: 'Link updated successfully'
       });
     } catch (err) {
       console.error('Error updating link:', err);
@@ -121,7 +140,7 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     try {
       const id = req.query.id;
-      
+
       if (!id) {
         return res.status(400).json({ error: 'Missing id parameter' });
       }
@@ -148,9 +167,9 @@ export default async function handler(req, res) {
 
       if (error) throw error;
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         success: true,
-        message: 'Link deleted successfully' 
+        message: 'Link deleted successfully'
       });
     } catch (err) {
       console.error('Error deleting link:', err);
