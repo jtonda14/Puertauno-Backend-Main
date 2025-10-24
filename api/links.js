@@ -99,23 +99,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing id parameter' });
       }
 
-      // Preparar los campos para actualización
-      const updateFields = {
-        url: linkData.url,
-        email: linkData.email || null,
-        exp_date: linkData.exp_date || null,
-        one_use: linkData.one_use || false,
-        used: linkData.used || false,
-        accommodation_code: linkData.accommodation_code || null,
-        accommodation_request_id: linkData.accommodation_request_id || null,
-      };
+      // Solo permitir actualización de email y exp_date
+      const updateFields = {};
+      
+      // Solo incluir email si está presente en el body
+      if (linkData.email !== undefined) {
+        updateFields.email = linkData.email || null;
+      }
+      
+      // Solo incluir exp_date si está presente en el body
+      if (linkData.exp_date !== undefined) {
+        updateFields.exp_date = linkData.exp_date || null;
+      }
 
-      // Remver campos undefined
-      Object.keys(updateFields).forEach(key => {
-        if (updateFields[key] === undefined) {
-          delete updateFields[key];
-        }
-      });
+      // Verificar que hay campos para actualizar
+      if (Object.keys(updateFields).length === 0) {
+        return res.status(400).json({ error: 'No valid fields to update' });
+      }
 
       const { data: updatedLink, error } = await supabase
         .from('links')

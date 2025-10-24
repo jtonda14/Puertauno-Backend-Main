@@ -140,17 +140,28 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const { data, error } = await supabase
+      const { acr_id } = req.query;
+      
+      let query = supabase
         .from('guests')
         .select('*, accommodation_requests!inner(short_id, check_in, check_out)')
-        .order('created_at', { ascending: false })
-        .limit(1000)
-      if (error) throw error
-      console.log(data)
-      return res.status(200).json({ guests: data })
+        .order('created_at', { ascending: false });
+      
+      // If acr_id is provided, filter by request_id
+      if (acr_id) {
+        query = query.eq('request_id', acr_id);
+      } else {
+        query = query.limit(1000);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      console.log(data);
+      return res.status(200).json({ guests: data });
     } catch (err) {
-      console.error(err)
-      return res.status(500).json({ error: err.message })
+      console.error(err);
+      return res.status(500).json({ error: err.message });
     }
   }
 

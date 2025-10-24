@@ -77,14 +77,14 @@ export default async function handler(req, res) {
 
     // Validar y filtrar solo los campos permitidos
     const allowedFields = [
-      'establishment_code',
+      'establishment_code', 
       'num_rooms', 
       'num_guests',
       'check_in',
       'check_out',
-      'email',
       'contract_reference',
-      'payment_type'
+      'payment_type',
+      'sent'
     ];
 
     const filteredData = {};
@@ -101,7 +101,7 @@ export default async function handler(req, res) {
     if (filteredData.num_guests !== undefined && (isNaN(filteredData.num_guests) || filteredData.num_guests < 0)) {
       return res.status(400).json({ error: 'num_guests must be a positive number' });
     }
-    if (filteredData.email !== undefined && filteredData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filteredData.email)) {
+    if (data.email !== undefined && data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
@@ -121,10 +121,8 @@ export default async function handler(req, res) {
       if (filteredData.check_out !== undefined) {
         linkUpdateData.exp_date = filteredData.check_out;
       }
-      if (filteredData.email !== undefined) {
-        linkUpdateData.email = filteredData.email;
-        // Si se cambia el email, resetear emails_sent a 0
-        linkUpdateData.emails_sent = 0;
+      if (data.email !== undefined) {
+        linkUpdateData.email = data.email;
       }
 
       // Solo actualizar el link si hay campos que cambiar
