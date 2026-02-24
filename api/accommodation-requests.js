@@ -20,6 +20,24 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
+      // Si se proporciona un ID específico, devolver solo ese accommodation_request
+      if (req.query.id) {
+        const { data, error } = await supabase
+          .from('accommodation_requests')
+          .select('*')
+          .eq('id', req.query.id)
+          .single();
+        
+        if (error) {
+          if (error.code === 'PGRST116') {
+            return res.status(404).json({ error: 'Not found' });
+          }
+          throw error;
+        }
+        return res.status(200).json({ accommodation_request: data });
+      }
+
+      // Si no hay ID, devolver lista filtrada
       let query = supabase
         .from('accommodation_requests')
         .select('*');
@@ -188,6 +206,9 @@ export default async function handler(req, res) {
       filteredData[field] = data[field];
     });
 
+    // Set initial status to 'to check in'
+    filteredData.status = 'to check in';
+
     try {
       const { data: created, error } = await supabase
         .from('accommodation_requests')
@@ -214,10 +235,30 @@ export default async function handler(req, res) {
         // No fallar la operación principal si falla la creación del link
       }
 
+      // Crear cuenta de gastos asociada a la reserva
+      const expenseAccountData = {
+        accommodation_request_id: created[0].id,
+        status: 'open',
+        total_amount: 0,
+        paid_amount: 0,
+        user_id: user.id
+      };
+
+      const { data: expenseAccountCreated, error: expenseAccountError } = await supabase
+        .from('expense_accounts')
+        .insert([expenseAccountData])
+        .select();
+
+      if (expenseAccountError) {
+        console.error('Error creating expense account:', expenseAccountError);
+        // No fallar la operación principal si falla la creación de la cuenta de gastos
+      }
+
       return res.status(201).json({ 
         success: true, 
         accommodation_request: created[0],
-        link: linkCreated ? linkCreated[0] : null
+        link: linkCreated ? linkCreated[0] : null,
+        expense_account: expenseAccountCreated ? expenseAccountCreated[0] : null
       });
     } catch (err) {
       console.error(err);

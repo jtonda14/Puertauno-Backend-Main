@@ -67,6 +67,67 @@ app.all('/api/vehicles', async (req, res) => {
   return wrap(mod.default)(req, res);
 });
 
+app.all('/api/rooms', async (req, res) => {
+  const mod = await import('./api/rooms.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/room-type', async (req, res) => {
+  const mod = await import('./api/room-type.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/room-assignments', async (req, res) => {
+  const mod = await import('./api/room-assignments.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/room-timeline', async (req, res) => {
+  const mod = await import('./api/room-timeline.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/daily-operations', async (req, res) => {
+  const mod = await import('./api/daily-operations.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/accommodation-status', async (req, res) => {
+  const mod = await import('./api/accommodation-status.js');
+  return wrap(mod.default)(req, res);
+});
+
+// Expense management routes
+app.all('/api/expense-categories', async (req, res) => {
+  const mod = await import('./api/expense-categories.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/billing-companies', async (req, res) => {
+  const mod = await import('./api/billing-companies.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/expense-accounts', async (req, res) => {
+  const mod = await import('./api/expense-accounts.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/expense-items', async (req, res) => {
+  const mod = await import('./api/expense-items.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/expense-payments', async (req, res) => {
+  const mod = await import('./api/expense-payments.js');
+  return wrap(mod.default)(req, res);
+});
+
+app.all('/api/expense-accounts/invoice', async (req, res) => {
+  const mod = await import('./api/expense-invoice.js');
+  return wrap(mod.default)(req, res);
+});
+
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', message: 'Puertauno Backend Main (local dev)' });
 });

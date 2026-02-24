@@ -70,6 +70,20 @@ export default async function handler(req, res) {
         .insert(guestData)
         .select();
       if (error) throw error;
+
+      // Si es el huésped principal, actualizar la cuenta de gastos con el guest_id
+      if (data.main_guest === true) {
+        const { error: expenseAccountError } = await supabase
+          .from('expense_accounts')
+          .update({ guest_id: newGuest[0].id })
+          .eq('accommodation_request_id', data.request_id);
+
+        if (expenseAccountError) {
+          console.error('Error updating expense account with guest_id:', expenseAccountError);
+          // No fallar la operación principal
+        }
+      }
+
       return res.status(201).json({ success: true, guest: newGuest[0] });
     } catch (err) {
       console.error(err);
@@ -109,6 +123,20 @@ export default async function handler(req, res) {
       if (!updated || updated.length === 0) {
         return res.status(404).json({ error: 'Not found' });
       }
+
+      // Si se actualiza a huésped principal, actualizar la cuenta de gastos
+      if (updateFields.main_guest === true) {
+        const { error: expenseAccountError } = await supabase
+          .from('expense_accounts')
+          .update({ guest_id: id })
+          .eq('accommodation_request_id', updated[0].request_id);
+
+        if (expenseAccountError) {
+          console.error('Error updating expense account with guest_id:', expenseAccountError);
+          // No fallar la operación principal
+        }
+      }
+
       return res.status(200).json({ success: true, updated: updated[0] });
     } catch (err) {
       console.error(err);
